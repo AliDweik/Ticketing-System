@@ -38,5 +38,8 @@ namespace TicketingSystem.Data.Models.Auth
         
         public ICollection<UserRole> UserRoles { get; set; }
         public ICollection<Ticket> CreatedTickets { get; set; }
+        public ICollection<Ticket> AssignedTickets { get; set; }
+        public ICollection<TicketAttachment> Attachments { get; set; }
+        public ICollection<TicketComment> Comments { get; set; }
     }
 }

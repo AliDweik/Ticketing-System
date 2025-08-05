@@ -82,8 +82,9 @@ namespace TicketingSystem.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserType")
-                        .HasColumnType("int");
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -253,9 +254,9 @@ namespace TicketingSystem.Data.Migrations
             modelBuilder.Entity("TicketingSystem.Data.Models.Ticketing.Ticket", b =>
                 {
                     b.HasOne("TicketingSystem.Data.Models.Auth.User", "AssignedTo")
-                        .WithMany()
+                        .WithMany("AssignedTickets")
                         .HasForeignKey("AssignedToId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TicketingSystem.Data.Models.Auth.User", "CreatedBy")
@@ -286,7 +287,7 @@ namespace TicketingSystem.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("TicketingSystem.Data.Models.Auth.User", "UploadedBy")
-                        .WithMany()
+                        .WithMany("Attachments")
                         .HasForeignKey("UploadedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -299,7 +300,7 @@ namespace TicketingSystem.Data.Migrations
             modelBuilder.Entity("TicketingSystem.Data.Models.Ticketing.TicketComment", b =>
                 {
                     b.HasOne("TicketingSystem.Data.Models.Auth.User", "CommentedBy")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("CommentedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -322,6 +323,12 @@ namespace TicketingSystem.Data.Migrations
 
             modelBuilder.Entity("TicketingSystem.Data.Models.Auth.User", b =>
                 {
+                    b.Navigation("AssignedTickets");
+
+                    b.Navigation("Attachments");
+
+                    b.Navigation("Comments");
+
                     b.Navigation("CreatedTickets");
 
                     b.Navigation("UserRoles");

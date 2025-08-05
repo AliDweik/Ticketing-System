@@ -29,32 +29,41 @@ namespace TicketingSystem.Data.Data
 
             modelBuilder.Entity<UserRole>().
                 HasKey(ur => new { ur.UserId, ur.RoleId });
+
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)
                 .HasForeignKey(ur => ur.UserId);
 
             modelBuilder.Entity<UserRole>()
-            .HasOne(ur => ur.Role)
-            .WithMany(r => r.UserRoles)
-            .HasForeignKey(ur => ur.RoleId);
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId);
 
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasMany(u => u.CreatedTickets)
-                    .WithOne(t => t.CreatedBy)
-                    .HasForeignKey(t => t.CreatedById)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
 
-            /*
-            modelBuilder.Entity<TicketAttachment>(entity =>
-            {
-                entity.HasOne(ta => ta.Ticket)
-                    .WithMany(t => t.Attachments)
-                    .HasForeignKey(ta => ta.TicketId)
-                    .OnDelete(DeleteBehavior.Cascade); // Keep if you want attachments deleted with tickets
-            });*/
+            modelBuilder.Entity<User>()
+            .HasMany(u => u.CreatedTickets)
+            .WithOne(t => t.CreatedBy)
+            .HasForeignKey(t => t.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.AssignedTickets)
+                .WithOne(t => t.AssignedTo)
+                .HasForeignKey(t => t.AssignedToId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            ConfigureUserRelationships(modelBuilder);
+
         }
+
+        private void ConfigureUserRelationships(ModelBuilder modelBuilder)
+        {
+            // Configure enum conversion
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserType)
+                .HasConversion<string>(); // Stores enum as string in DB
+        }
+
     }
 }
