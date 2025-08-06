@@ -42,10 +42,10 @@ namespace TicketingSystem.Data.Data
 
 
             modelBuilder.Entity<User>()
-            .HasMany(u => u.CreatedTickets)
-            .WithOne(t => t.CreatedBy)
-            .HasForeignKey(t => t.CreatedById)
-            .OnDelete(DeleteBehavior.Restrict);
+                .HasMany(u => u.CreatedTickets)
+                .WithOne(t => t.CreatedBy)
+                .HasForeignKey(t => t.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.AssignedTickets)

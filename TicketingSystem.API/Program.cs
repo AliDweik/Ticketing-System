@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using TicketingSystem.Data.Data;
+using TicketingSystem.Data.Repositories.Implements;
+using TicketingSystem.Data.Repositories.Interfaces;
 
 namespace TicketingSystem.API
 {
@@ -14,6 +16,13 @@ namespace TicketingSystem.API
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+            builder.Services.AddScoped<IAuthRepo, AuthRepo>();
+            builder.Services.AddScoped<ITicketRepo, TicketRepo>();
+            builder.Services.AddScoped<ITicketAssignmentRepo, TicketAssignmentRepo>();
+            builder.Services.AddScoped<ITicketAttachmentRepo, TicketAttachmentRepo>();
+            builder.Services.AddScoped<ITicketCommnetRepo, TicketCommentRepo>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

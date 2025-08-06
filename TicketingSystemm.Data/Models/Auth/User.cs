@@ -15,6 +15,7 @@ namespace TicketingSystem.Data.Models.Auth
         public Guid Id { get; set; }
         [Required]
         [MaxLength(100)]
+
         public string FullName { get; set; }
         [Required]
         [EmailAddress]
