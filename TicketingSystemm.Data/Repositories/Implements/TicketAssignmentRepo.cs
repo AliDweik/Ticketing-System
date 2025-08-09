@@ -29,7 +29,7 @@ namespace TicketingSystem.Data.Repositories.Implements
         
             var support = await _context.Users.FirstOrDefaultAsync(u => (u.Id == supportId && u.UserType == UserType.Support));
 
-            if (support == null)
+            if (support == null || support.IsActive == false)
                 throw new InvalidOperationException("Invalid support user");
 
             ticket.AssignedToId = supportId;
@@ -47,6 +47,15 @@ namespace TicketingSystem.Data.Repositories.Implements
                 throw new InvalidOperationException("Invalid support user");
 
             return support.AssignedTickets.ToList();
+        }
+
+        public async Task<bool> IsTicketAssigned(Guid ticketId)
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == ticketId);
+            if(ticket == null || ticket.AssignedToId == null)
+                return false;
+
+            return true;
         }
     }
 }

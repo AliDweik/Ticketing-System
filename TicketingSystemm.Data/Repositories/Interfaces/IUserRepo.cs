@@ -15,7 +15,7 @@ namespace TicketingSystem.Data.Repositories.Interfaces
         Task <IEnumerable<User>> GetUsersByType(UserType userType);
 
         Task ActivateUser(Guid userId);
-        Task DeactivateUserAsync(Guid userId);
+        Task DeactivateUser(Guid userId);
 
     }
 }

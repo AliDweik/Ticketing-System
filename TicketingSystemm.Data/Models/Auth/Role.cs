@@ -13,6 +13,6 @@ namespace TicketingSystem.Data.Models.Auth
         public Guid Id { get; set; }
         [Required]
         public string Name { get; set; }
-        public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; } = [];
     }
 }

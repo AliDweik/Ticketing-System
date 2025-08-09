@@ -24,7 +24,7 @@ namespace TicketingSystem.Data.Models.Auth
         [MaxLength(20)]
         public string MobileNumber { get; set; }
         public string Address  { get; set; }
-        public string UserImagePath { get; set; }
+        public string? UserImagePath { get; set; }
 
         [Required]
         public UserType UserType { get; set; }
@@ -36,11 +36,12 @@ namespace TicketingSystem.Data.Models.Auth
         
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
-        
-        public ICollection<UserRole> UserRoles { get; set; }
-        public ICollection<Ticket> CreatedTickets { get; set; }
-        public ICollection<Ticket> AssignedTickets { get; set; }
-        public ICollection<TicketAttachment> Attachments { get; set; }
-        public ICollection<TicketComment> Comments { get; set; }
+
+
+        public ICollection<UserRole> UserRoles { get; set; } = [];
+        public ICollection<Ticket> CreatedTickets { get; set; } = [];
+        public ICollection<Ticket> AssignedTickets { get; set; } = [];
+        public ICollection<TicketAttachment> Attachments { get; set; } = [];
+        public ICollection<TicketComment> Comments { get; set; } = [];
     }
 }

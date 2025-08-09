@@ -23,30 +23,40 @@ namespace TicketingSystem.Data.Repositories.Implements
         
         public async Task<User?> Login(string userName, string password)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefaultAsync(u => (u.FullName == userName || u.Email == userName));
+            var user = await _context.Users.FirstOrDefaultAsync(u => (u.FullName == userName || u.Email == userName));
             if (user == null)
                 return null;
 
             if (!PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
 
-            return user;
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
         }
 
-        public async Task<User> Register(User user, string password, UserType userType)
+        public async Task<User> Register(User user, string password)
         {
             PasswordHelper.CreatePasswordHash(password, out var passwordHash, out var passwordSalt);
             
             user.PasswordSalt = passwordSalt;
             user.PasswordHash = passwordHash;
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
             
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == userType.ToString());
+            string userType;
+            if (user.UserType == UserType.Admin)
+                userType = "Admin";
+            else if (user.UserType == UserType.Support)
+                userType = "Support";
+            else
+                userType = "Client";
+
+            // ToCheck
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == userType);
 
             var roleId = role!.Id;
+
 
             
             var userRole = new UserRole
@@ -55,6 +65,9 @@ namespace TicketingSystem.Data.Repositories.Implements
                 RoleId = roleId
             };
 
+            user.UserRoles.Add(userRole);
+
+            await _context.Users.AddAsync(user);
             await _context.UserRoles.AddAsync(userRole);
             await _context.SaveChangesAsync();
 

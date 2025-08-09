@@ -20,12 +20,12 @@ namespace TicketingSystem.Data.Models.Ticketing
         public string Status { get; set; } = "New";
         
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime LastUpdateAt { get; set; }
-        public DateTime ClosedAt { get; set; }
+        public DateTime? LastUpdateAt { get; set; }
+        public DateTime? ClosedAt { get; set; }
 
         [ForeignKey("AssignedTo")]
-        public Guid AssignedToId { get; set; }
-        public User AssignedTo { get; set; }
+        public Guid? AssignedToId { get; set; }
+        public User? AssignedTo { get; set; }
 
         [ForeignKey("CreatedBy")]
         public Guid CreatedById { get; set; }
@@ -35,8 +35,8 @@ namespace TicketingSystem.Data.Models.Ticketing
         public Guid ProductId { get; set; }
         public Product Product { get; set; }
 
-        public ICollection<TicketComment> Comments { get; set; }
-        public ICollection<TicketAttachment> Attachments { get; set; }
+        public ICollection<TicketComment> Comments { get; set; } = [];
+        public ICollection<TicketAttachment> Attachments { get; set; } = [];
 
     }
 }

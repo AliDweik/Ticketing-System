@@ -31,7 +31,7 @@ namespace TicketingSystem.Data.Repositories.Implements
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeactivateUserAsync(Guid userId)
+        public async Task DeactivateUser(Guid userId)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 

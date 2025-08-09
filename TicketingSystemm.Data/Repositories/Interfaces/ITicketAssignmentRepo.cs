@@ -11,5 +11,6 @@ namespace TicketingSystem.Data.Repositories.Interfaces
     {
         Task AssignTicket(Guid ticketId, Guid supportId);
         Task<List<Ticket>> GetAssignedTickets(Guid supportId);
+        Task<bool> IsTicketAssigned(Guid ticketId);
     }
 }
