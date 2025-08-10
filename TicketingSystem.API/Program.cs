@@ -36,7 +36,9 @@ namespace TicketingSystem.API
             builder.Services.AddScoped<ITicketAssignmentRepo, TicketAssignmentRepo>();
             builder.Services.AddScoped<ITicketAttachmentRepo, TicketAttachmentRepo>();
             builder.Services.AddScoped<ITicketCommnetRepo, TicketCommentRepo>();
-
+            builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+            
+            
             builder.Services.AddEndpointsApiExplorer();
            
             builder.Services.AddSwaggerGen(options => {
