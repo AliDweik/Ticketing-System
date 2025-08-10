@@ -51,22 +51,27 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task<TicketAttachment> GetAttachment(Guid attachmentId)
         {
-            var attachment = await _context.TicketAttachments.FindAsync(attachmentId);
+            var attachment = await _context.TicketAttachments.FirstOrDefaultAsync(t => t.Id == attachmentId);
 
-            if(attachment == null)
-                throw new KeyNotFoundException("Attachment not found");
+            if (attachment == null)
+                throw new KeyNotFoundException("Ticket not found");
 
             return attachment;
         }
 
         public async Task<List<TicketAttachment>> GetAttachmentsForTicket(Guid ticketId)
         {
-            var ticket = await _context.Tickets.FindAsync(ticketId);
+            var ticket = await _context.Tickets
+                .Include(t => t.Attachments)
+                .FirstOrDefaultAsync(t => t.Id == ticketId);
 
             if (ticket == null)
-                throw new KeyNotFoundException("Attachment not found");
+                throw new KeyNotFoundException("Ticket not found");
 
-            return ticket.Attachments.ToList();
+
+            var attachments = ticket.Attachments.ToList();
+
+            return attachments;
         }
     }
 }

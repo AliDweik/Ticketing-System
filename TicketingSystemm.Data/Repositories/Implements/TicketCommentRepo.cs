@@ -49,7 +49,9 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task<List<TicketComment>> GetCommentsForTicket(Guid ticketId)
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            var ticket = await _context.Tickets
+                .Include(t => t.Comments) 
+                .FirstOrDefaultAsync(t => t.Id == ticketId);
 
             if (ticket == null)
                 throw new InvalidOperationException("Invalid support user");

@@ -98,6 +98,7 @@ namespace TicketingSystem.API
             builder.Services.AddScoped<IAuthorizationHandler, UserActiveHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, UserWithoutTicketHandler>();
             builder.Services.AddScoped<IAuthorizationHandler, UserWithTicketHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, AttachmentHandler>();
 
             builder.Services.AddAuthorization(options =>
             {
@@ -109,6 +110,9 @@ namespace TicketingSystem.API
 
                 options.AddPolicy("UserActive", policy =>
                     policy.Requirements.Add(new UserRequirement()));
+
+                options.AddPolicy("Attachment", policy =>
+                    policy.Requirements.Add(new AttachmentRequirement()));
             });
 
             

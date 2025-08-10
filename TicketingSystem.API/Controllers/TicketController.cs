@@ -94,7 +94,7 @@ namespace TicketingSystem.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TicketResponse>>> GetFilterdTickets(TicketFilter filter)
+        public async Task<ActionResult<IEnumerable<TicketResponse>>> GetFilterdTickets([FromQuery] TicketFilter filter)
         {
             var tickets = await _repo.GetFilterdTickets(filter);
             var ticketsResponse = new List<TicketResponse>();
@@ -122,7 +122,7 @@ namespace TicketingSystem.API.Controllers
 
         [Authorize(Policy = "UserWithoutTicket")]
         [HttpGet("{userId}/filterd")]
-        public async Task<ActionResult<IEnumerable<TicketResponse>>> GetFilterdTicketsForUser(Guid userId,TicketFilter filter)
+        public async Task<ActionResult<IEnumerable<TicketResponse>>> GetFilterdTicketsForUser(Guid userId, [FromQuery] TicketFilter filter)
         {
             var tickets = await _repo.GetFilterdTickets(userId, filter);
             var ticketsResponse = new List<TicketResponse>();

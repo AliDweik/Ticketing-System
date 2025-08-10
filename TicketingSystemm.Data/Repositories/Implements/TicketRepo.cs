@@ -9,6 +9,7 @@ using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TicketingSystem.Data.Repositories.Implements
 {
@@ -24,28 +25,33 @@ namespace TicketingSystem.Data.Repositories.Implements
         public async Task<IEnumerable<Ticket>> GetFilterdTickets(TicketFilter ticketFilter)
         {
             var query = _context.Tickets
-               .Include(t => t.Product)
-               .Include(t => t.CreatedBy)
-               .Include(t => t.AssignedTo)
-               .AsQueryable();
+                    .Include(t => t.Product)
+                    .Include(t => t.CreatedBy)
+                    .Include(t => t.AssignedTo)
+                    .AsQueryable();
 
-            if (ticketFilter.Status != "")
+            if (!string.IsNullOrEmpty(ticketFilter.Status))
                 query = query.Where(t => t.Status == ticketFilter.Status);
 
             if (ticketFilter.ProductId.HasValue)
-                query = query.Where(t => t.ProductId == ticketFilter.ProductId);
+                query = query.Where(t => t.ProductId == ticketFilter.ProductId.Value);
 
             if (ticketFilter.CreatedById.HasValue)
-                query = query.Where(t => t.CreatedById == ticketFilter.CreatedById);
+                query = query.Where(t => t.CreatedById == ticketFilter.CreatedById.Value);
 
             if (ticketFilter.AssignedToId.HasValue)
-                query = query.Where(t => t.AssignedToId == ticketFilter.AssignedToId);
+                query = query.Where(t => t.AssignedToId == ticketFilter.AssignedToId.Value);
 
-            /*if (ticketFilter.SortBy != "")
-                query = query.OrderBy($"{ticketFilter.SortBy} {(ticketFilter.SortDescending ? "desc" : "asc")}");
-            else*/
-                query = query.OrderByDescending(t => t.CreatedAt);
-            
+            query = ticketFilter.SortBy?.ToLower() switch
+            {
+                "status" => ticketFilter.SortDescending ?
+                    query.OrderByDescending(t => t.Status) :
+                    query.OrderBy(t => t.Status),
+                "createdat" => ticketFilter.SortDescending ?
+                    query.OrderByDescending(t => t.CreatedAt) :
+                    query.OrderBy(t => t.CreatedAt),
+                _ => query.OrderByDescending(t => t.CreatedAt) // Default sort
+            };
 
             return await query.ToListAsync();
         }
