@@ -30,7 +30,7 @@ namespace TicketingSystem.Data.Repositories.Implements
                     .Include(t => t.AssignedTo)
                     .AsQueryable();
 
-            if (!string.IsNullOrEmpty(ticketFilter.Status))
+            if (ticketFilter.Status != null)
                 query = query.Where(t => t.Status == ticketFilter.Status);
 
             if (ticketFilter.ProductId.HasValue)
@@ -64,7 +64,7 @@ namespace TicketingSystem.Data.Repositories.Implements
                .Include(t => t.AssignedToId == userId)
                .AsQueryable();
 
-            if (ticketFilter.Status != "")
+            if (ticketFilter.Status != null)
                 query = query.Where(t => t.Status == ticketFilter.Status);
 
             if (ticketFilter.ProductId.HasValue)
@@ -112,7 +112,7 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         }
 
-        public async Task<Ticket> UpdateTicketStatus(Guid ticketId, string status)
+        public async Task<Ticket> UpdateTicketStatus(Guid ticketId, TicketStatusEnum status)
         {
             var ticket = await _context.Tickets.FindAsync(ticketId);
 
@@ -133,6 +133,14 @@ namespace TicketingSystem.Data.Repositories.Implements
             await _context.SaveChangesAsync();
 
             return ticket;
+        }
+
+        public async Task FixTicket(Guid ticketId)
+        {
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (!ticket.IsFixed)
+                ticket.IsFixed = true;
+            await _context.SaveChangesAsync();
         }
     }
 }

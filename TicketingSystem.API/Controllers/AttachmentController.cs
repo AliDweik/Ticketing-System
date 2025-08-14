@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
 
@@ -14,30 +15,67 @@ namespace TicketingSystem.API.Controllers
     public class AttachmentController : ControllerBase
     {
         private readonly ITicketAttachmentRepo _repo;
-        public AttachmentController(ITicketAttachmentRepo repo)
+        private readonly ITicketRepo _ticketRepo;
+        private readonly IWebHostEnvironment _env;
+
+        public AttachmentController(ITicketAttachmentRepo repo, ITicketRepo ticketRepo, IWebHostEnvironment env)
         {
             _repo = repo;
+            _ticketRepo = ticketRepo;
+            _env = env;
         }
 
         [Authorize(Policy = "UserWithTicket")]
         [HttpPost("{ticketId}")]
-        public async Task<ActionResult<AttachmentResponse>> AddAttachment(AttachmentRequest request)
+        public async Task<ActionResult> AddAttachment([FromForm] AttachmentRequest request)
         {
-            var createdAttachment = await _repo.AddAttachment(request.TicketId,request.UploadedById,request.FileName,request.FilePath);
-
-            var attachment = new AttachmentResponse
+            var ticket = await _ticketRepo.GetTicket(request.TicketId);
+            if (!TicketHelper.CanStart(ticket))
             {
-                Id = createdAttachment.Id,
-                FileName = createdAttachment.FileName,
-                TicketId = createdAttachment.TicketId,
-                UploadedById = createdAttachment.UploadedById,
-                UploadedAt = createdAttachment.UploadedAt,
-            };
+                return BadRequest();
+            }
 
-            return Ok(attachment);
+            var uploadRoot = Path.Combine(_env.ContentRootPath, "Uploads");
+            Directory.CreateDirectory(uploadRoot);
+
+            var savedAttachments = new List<AttachmentResponse>();
+
+            foreach (var file in request.Files)
+            {
+                var uniqueName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid():N}{Path.GetExtension(file.FileName)}";
+                var path = Path.Combine(uploadRoot, uniqueName);
+
+                await using var stream = System.IO.File.Create(path);
+                await file.CopyToAsync(stream);
+
+                var attach = new TicketAttachment
+                {
+                    OriginalFileName = file.FileName,
+                    StoredFileName = uniqueName,
+                    Size = file.Length,
+                    FilePath = path,
+                    UploadedAt = DateTime.Now,
+                    UploadedById = request.UploadedById,
+                    TicketId = request.TicketId,
+                };
+                var attachmentWithId = await _repo.AddAttachment(attach);
+                var attachmentResponse = new AttachmentResponse
+                {
+                    StoredFileName = attachmentWithId.StoredFileName,
+                    UploadedAt = attachmentWithId.UploadedAt,
+                    TicketId = attachmentWithId.TicketId,
+                    UploadedById = attachmentWithId.UploadedById,
+                    FilePath = attachmentWithId.FilePath,
+                    Id = attachmentWithId.Id
+                };
+
+                savedAttachments.Add(attachmentResponse);
+            }
+
+            return Ok(savedAttachments);
         }
 
-        [Authorize(Policy = "UserWithTicket")]
+        [PolicyOrRole("UserWithTicket","Admin")]
         [HttpGet("{ticketId}")]
         public async Task<ActionResult<AttachmentResponse>> GetAttachmentForTicket(Guid ticketId)
         {
@@ -50,17 +88,18 @@ namespace TicketingSystem.API.Controllers
                 attachmentsResponse.Add(new AttachmentResponse
                 {
                     Id = attachment.Id,
-                    FileName = attachment.FileName,
+                    StoredFileName = attachment.StoredFileName,
                     TicketId = attachment.TicketId,
                     UploadedById = attachment.UploadedById,
                     UploadedAt = attachment.UploadedAt,
+                    FilePath = attachment.FilePath
                 });
             }
             
             return Ok(attachmentsResponse);
         }
 
-        [Authorize(Policy = "Attachment")]
+        [PolicyOrRole("Attachment", "Admin")]
         [HttpGet("{attachmentId}/attachment")]
         public async Task<ActionResult<AttachmentResponse>> GetAttachment(Guid attachmentId)
         {
@@ -69,11 +108,12 @@ namespace TicketingSystem.API.Controllers
             var attachmentResponse = new AttachmentResponse
                 {
                     Id = attachment.Id,
-                    FileName = attachment.FileName,
+                    StoredFileName = attachment.StoredFileName,
                     TicketId = attachment.TicketId,
                     UploadedById = attachment.UploadedById,
                     UploadedAt = attachment.UploadedAt,
-                };
+                    FilePath = attachment.FilePath
+            };
 
             return Ok(attachmentResponse);
         }

@@ -9,7 +9,7 @@ namespace TicketingSystem.Data.Repositories.Interfaces
 {
     public interface ITicketAttachmentRepo
     {
-        Task<TicketAttachment> AddAttachment(Guid ticketId, Guid clientId, string fileName, string filePath);
+        Task<TicketAttachment> AddAttachment(TicketAttachment attachment);
 
         Task<List<TicketAttachment>> GetAttachmentsForTicket(Guid ticketId);
         Task <TicketAttachment> GetAttachment(Guid attachmentId);

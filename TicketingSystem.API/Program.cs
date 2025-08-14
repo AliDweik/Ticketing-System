@@ -25,6 +25,11 @@ namespace TicketingSystem.API
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
+            builder.Services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
+
             //builder.Services.AddControllersWithViews();
 
             builder.Services.AddEndpointsApiExplorer();
@@ -121,6 +126,17 @@ namespace TicketingSystem.API
 
             builder.Services.AddHealthChecks();
 
+            var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")!.Split(",");
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                });
+            });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -134,7 +150,7 @@ namespace TicketingSystem.API
 
             app.UseAuthorization();
 
-
+            app.UseCors();
             app.MapControllers();
 
             app.MapHealthChecks("/health");

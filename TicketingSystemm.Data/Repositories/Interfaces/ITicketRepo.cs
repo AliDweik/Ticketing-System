@@ -18,8 +18,9 @@ namespace TicketingSystem.Data.Repositories.Interfaces
         Task<IEnumerable<Ticket>> GetFilterdTickets(TicketFilter ticketFilter);
         Task<IEnumerable<Ticket>> GetFilterdTickets(Guid userId,TicketFilter ticketFilter);
 
-        Task<Ticket> UpdateTicketStatus(Guid ticketId, string status);
+        Task<Ticket> UpdateTicketStatus(Guid ticketId, TicketStatusEnum status);
 
+        Task FixTicket(Guid ticketId);
         Task <bool> IsTicketOwner(Guid ticketId, Guid userId);
         Task<bool> IsTicketAssigner(Guid ticketId, Guid userId);
 

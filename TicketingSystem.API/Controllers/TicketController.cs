@@ -6,7 +6,9 @@ using TicketingSystem.API.Dtos;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Models.Ticketing;
+using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Repositories.Interfaces;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace TicketingSystem.API.Controllers
 {
@@ -21,6 +23,13 @@ namespace TicketingSystem.API.Controllers
             _repo = repo;
         }
 
+        [HttpPut("{ticketId}/fix")]
+        [Authorize(Roles = "Client", Policy = "UserWithTicket")]
+        public async Task<ActionResult> FixTicket(Guid ticketId)
+        {
+            return Ok(_repo.FixTicket(ticketId));
+        }
+
         [HttpPost]
         [Authorize(Roles = "Client")]
         public async Task<ActionResult<TicketRequest>> AddTicket(TicketRequest ticket)
@@ -32,6 +41,7 @@ namespace TicketingSystem.API.Controllers
                 CreatedAt = DateTime.Now,
                 CreatedById = ticket.CreatedById,
                 ProductId = ticket.ProductId,
+                Status = TicketStatusEnum.New
             };
 
             await _repo.CreateTicket(ticketToCreate);
@@ -57,6 +67,7 @@ namespace TicketingSystem.API.Controllers
                 ProductId = ticket.ProductId,
                 CreatedById = ticket.CreatedById,
                 AssignedToId = ticket.AssignedToId,
+                IsFixed = ticket.IsFixed,
                 ClosedAt = ticket.ClosedAt,
             };
 
@@ -84,6 +95,7 @@ namespace TicketingSystem.API.Controllers
                         LastUpdateAt = ticket.LastUpdateAt,
                         ProductId = ticket.ProductId,
                         CreatedById = ticket.CreatedById,
+                        IsFixed = ticket.IsFixed,
                         AssignedToId = ticket.AssignedToId,
                         ClosedAt = ticket.ClosedAt,
                     });
@@ -108,6 +120,7 @@ namespace TicketingSystem.API.Controllers
                         ProblemDescription = ticket.ProblemDescription,
                         Status = ticket.Status,
                         CreatedAt = DateTime.Now,
+                        IsFixed= ticket.IsFixed,
                         LastUpdateAt = ticket.LastUpdateAt,
                         ProductId = ticket.ProductId,
                         CreatedById = ticket.CreatedById,
@@ -136,6 +149,7 @@ namespace TicketingSystem.API.Controllers
                     ProblemDescription = ticket.ProblemDescription,
                     Status = ticket.Status,
                     CreatedAt = DateTime.Now,
+                    IsFixed = ticket.IsFixed,
                     LastUpdateAt = ticket.LastUpdateAt,
                     ProductId = ticket.ProductId,
                     CreatedById = ticket.CreatedById,
@@ -148,24 +162,44 @@ namespace TicketingSystem.API.Controllers
             return Ok(ticketsResponse);
         }
 
-        [Authorize(Policy = "UserWithTicket")]
+        [Authorize(Roles = "Support", Policy = "UserWithTicket")]
         [HttpPut("{ticketId}")]
         public async Task<ActionResult<TicketResponse>> UpdateTicketStatus(Guid ticketId, string status)
         {
-            var updatedTicket = await _repo.UpdateTicketStatus(ticketId, status);
+
+            TicketStatusEnum statusEnum;
+            if (status == "In Progress")
+            {
+                statusEnum = TicketStatusEnum.InProgress;
+            }
+            else if(status == "Closed")
+            {
+                statusEnum = TicketStatusEnum.Closed;
+            }
+            else
+            {
+                statusEnum = TicketStatusEnum.InProgress;
+            }
+            var ticket = await _repo.UpdateTicketStatus(ticketId, statusEnum);
+
+            if(status == "Closed" && ticket.IsFixed == false)
+            {
+                return BadRequest("Ticket is not fixed");
+            }
 
             var ticketResponse = new TicketResponse
             {
-                Id = updatedTicket.Id,
-                Title = updatedTicket.Title,
-                ProblemDescription = updatedTicket.ProblemDescription,
-                Status = updatedTicket.Status,
+                Id = ticket.Id,
+                Title = ticket.Title,
+                ProblemDescription = ticket.ProblemDescription,
+                Status = ticket.Status,
+                IsFixed = ticket.IsFixed,
                 CreatedAt = DateTime.Now,
-                LastUpdateAt = updatedTicket.LastUpdateAt,
-                ProductId = updatedTicket.ProductId,
-                CreatedById = updatedTicket.CreatedById,
-                AssignedToId = updatedTicket.AssignedToId,
-                ClosedAt = updatedTicket.ClosedAt,
+                LastUpdateAt = ticket.LastUpdateAt,
+                ProductId = ticket.ProductId,
+                CreatedById = ticket.CreatedById,
+                AssignedToId = ticket.AssignedToId,
+                ClosedAt = ticket.ClosedAt,
             };
 
             return Ok(ticketResponse);

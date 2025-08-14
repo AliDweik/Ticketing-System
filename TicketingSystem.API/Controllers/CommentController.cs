@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Ticketing;
+using TicketingSystem.Data.Repositories.Implements;
 using TicketingSystem.Data.Repositories.Interfaces;
 
 namespace TicketingSystem.API.Controllers
@@ -14,15 +16,23 @@ namespace TicketingSystem.API.Controllers
     public class CommentController : ControllerBase
     {
         private readonly ITicketCommnetRepo _repo;
-        public CommentController(ITicketCommnetRepo repo)
+        private readonly ITicketRepo _ticketRepo;
+
+        public CommentController(ITicketCommnetRepo repo, ITicketRepo ticketRepo)
         {
             _repo = repo;
+            _ticketRepo = ticketRepo;
         }
 
         [Authorize(Policy = "UserWithTicket")]
         [HttpPost("{ticketId}")]
         public async Task<ActionResult<CommentResponse>> AddComment(CommentRequest request)
         {
+            var ticket = await _ticketRepo.GetTicket(request.TicketId);
+            if (!TicketHelper.CanStart(ticket))
+            {
+                return BadRequest();
+            }
             var createdComment = await _repo.AddComment(request.TicketId, request.CommentedById, request.Comment);
 
             var commentResponse = new CommentResponse

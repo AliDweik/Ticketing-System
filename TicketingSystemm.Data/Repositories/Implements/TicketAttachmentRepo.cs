@@ -19,34 +19,23 @@ namespace TicketingSystem.Data.Repositories.Implements
             _context = context;
         }
 
-        public async Task<TicketAttachment> AddAttachment(Guid ticketId, Guid userId, string fileName, string filePath)
+        public async Task<TicketAttachment> AddAttachment(TicketAttachment attachment)
         {
-            var ticket = await _context.Tickets.FindAsync(ticketId);
+            var ticket = await _context.Tickets.FindAsync(attachment.TicketId);
 
             if (ticket == null)
                 throw new KeyNotFoundException("Ticket not found");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => (u.Id == userId));
+            var user = await _context.Users.FirstOrDefaultAsync(u => (u.Id == attachment.UploadedById));
 
             if (user == null)
                 throw new InvalidOperationException("Invalid user");
 
-            var ticketAttathment = new TicketAttachment
-            {
-                FileName = fileName,
-                FilePath = filePath,
-                Ticket = ticket,
-                TicketId = ticketId,
-                UploadedAt = DateTime.Now,
-                UploadedBy = user,
-                UploadedById = userId
-            };
-
-            ticket.Attachments.Add(ticketAttathment);
+            ticket.Attachments.Add(attachment);
 
             await _context.SaveChangesAsync();
 
-            return ticketAttathment;
+            return attachment;
         }
 
         public async Task<TicketAttachment> GetAttachment(Guid attachmentId)

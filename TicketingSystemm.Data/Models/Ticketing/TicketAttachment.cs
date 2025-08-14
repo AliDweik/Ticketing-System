@@ -13,9 +13,14 @@ namespace TicketingSystem.Data.Models.Ticketing
     {
         [Key]
         public Guid Id { get; set; }
-        public string FileName { get; set; } = "New File";
+        public string StoredFileName { get; set; }
+        public string OriginalFileName { get; set; }
+        
+        public long Size { get; set; }
+
         [Required]
         public string FilePath { get; set; }
+        
         public DateTime UploadedAt { get; set; } = DateTime.Now;
 
         [ForeignKey("Ticket")]

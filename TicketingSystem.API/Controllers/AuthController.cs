@@ -27,7 +27,7 @@ namespace TicketingSystem.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login(Dtos.LoginRequest request)
+        public async Task<ActionResult<string>> Login(Dtos.LoginRequest request)
         {
             var user = await _repo.Login(request.FullName,request.Password);
 
@@ -63,13 +63,13 @@ namespace TicketingSystem.API.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescription);
 
-
             return Ok(new
             {
                 token = tokenHandler.WriteToken(token),
                 user = new
                 {
                     userName = user.FullName,
+                    userId = user.Id,
                     roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
                 }
             });
@@ -80,6 +80,8 @@ namespace TicketingSystem.API.Controllers
         {
             if(await _repo.UserExists(request.FullName))
                 return BadRequest("Username already exisits");
+            if (await _repo.UserExists(request.Email))
+                return BadRequest("Email already exisits");
 
             var userToCreate = new User
             {
@@ -96,9 +98,9 @@ namespace TicketingSystem.API.Controllers
             if(request.UserType == UserType.Client)
                 userToCreate.IsActive = true;
 
-            await _repo.Register(userToCreate, request.Password);
+            var user = await _repo.Register(userToCreate, request.Password);
 
-            return StatusCode(201);
+            return Ok(user);
         }
     }
 }

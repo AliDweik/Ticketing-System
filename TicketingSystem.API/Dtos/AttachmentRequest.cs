@@ -7,8 +7,7 @@ namespace TicketingSystem.API.Dtos
 {
     public class AttachmentRequest
     {
-        public string FileName { get; set; } = "New File";
-        public string FilePath { get; set; }    
+        public List<IFormFile> Files { get; set; }
         public Guid TicketId { get; set; }
         public Guid UploadedById { get; set; }
     }

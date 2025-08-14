@@ -63,7 +63,7 @@ namespace TicketingSystem.API.Controllers
             var supports = await _repo.GetUsersByType(Data.Enums.UserType.Support);
             var supportsRepsonse = new List<UserResponse>();
 
-            foreach (var support in supportsRepsonse)
+            foreach (var support in supports)
             {
                 supportsRepsonse.Add(new UserResponse
                 {

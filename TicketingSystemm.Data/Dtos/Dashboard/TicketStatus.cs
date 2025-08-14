@@ -1,8 +1,11 @@
-﻿namespace TicketingSystem.Data.Dtos.Dashboard
+﻿
+using TicketingSystem.Data.Enums;
+
+namespace TicketingSystem.Data.Dtos.Dashboard
 {
     public class TicketStatus
     {
-        public string Status { get; set; }
+        public TicketStatusEnum Status { get; set; }
         public int Count { get; set; }
     }
 }

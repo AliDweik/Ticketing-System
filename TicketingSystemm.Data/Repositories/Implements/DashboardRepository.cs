@@ -76,9 +76,8 @@ namespace TicketingSystem.Data.Repositories.Implements
                 return new DashboardSummary
                 {
                     TotalTickets = await _context.Tickets.CountAsync(),
-                    OpenTickets = await _context.Tickets.CountAsync(t => t.Status == "Assigned"),
-                    InProgressTickets = await _context.Tickets.CountAsync(t => t.Status == "In Progress"),
-                    ResolvedTickets = await _context.Tickets.CountAsync(t => t.Status == "Closed"),
+                    InProgressTickets = await _context.Tickets.CountAsync(t => t.Status == Enums.TicketStatusEnum.InProgress),
+                    ResolvedTickets = await _context.Tickets.CountAsync(t => t.Status == Enums.TicketStatusEnum.Closed),
                 };
             }
             catch (Exception ex)
@@ -89,10 +88,10 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task<List<UserTicketCount>> GetTopSolversAsync(int count)
         {
-            var total = await _context.Tickets.CountAsync(t => t.Status == "Closed");
+            var total = await _context.Tickets.CountAsync(t => t.Status == Enums.TicketStatusEnum.Closed);
 
             return await _context.Tickets
-                .Where(t => t.Status == "Closed")
+                .Where(t => t.Status == Enums.TicketStatusEnum.Closed)
                 .GroupBy(t => t.AssignedTo)
                 .Select(g => new UserTicketCount
                 {

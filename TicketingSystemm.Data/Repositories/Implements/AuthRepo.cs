@@ -43,14 +43,15 @@ namespace TicketingSystem.Data.Repositories.Implements
             user.PasswordSalt = passwordSalt;
             user.PasswordHash = passwordHash;
 
-            
             string userType;
-            if (user.UserType == UserType.Admin)
-                userType = "Admin";
-            else if (user.UserType == UserType.Support)
+            if (user.UserType == UserType.Support)
                 userType = "Support";
-            else
+            else if(user.UserType == UserType.Client)
                 userType = "Client";
+            else
+            {
+                throw new Exception("User Type Is Not Defined");
+            }
 
             // ToCheck
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == userType);

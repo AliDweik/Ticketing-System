@@ -33,7 +33,7 @@ namespace TicketingSystem.Data.Repositories.Implements
                 throw new InvalidOperationException("Invalid support user");
 
             ticket.AssignedToId = supportId;
-            ticket.Status = "Assigned";
+            ticket.Status = TicketStatusEnum.InProgress;
             ticket.LastUpdateAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
@@ -51,7 +51,7 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task<bool> IsTicketAssigned(Guid ticketId)
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == ticketId);
+            var ticket = await _context.Tickets.FindAsync(ticketId);
             if(ticket == null || ticket.AssignedToId == null)
                 return false;
 

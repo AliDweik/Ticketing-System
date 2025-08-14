@@ -54,6 +54,10 @@ namespace TicketingSystem.Data.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             ConfigureUserRelationships(modelBuilder);
+            
+            modelBuilder.Entity<Ticket>()
+                .Property(u => u.Status)
+                .HasConversion<int>();
 
         }
 
