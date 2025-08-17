@@ -7,10 +7,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using TicketingSystem.API.Dtos;
 using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Models.Auth;
+using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
-using TicketingSystem.API.Dtos;
 
 namespace TicketingSystem.API.Controllers
 {
@@ -20,14 +21,16 @@ namespace TicketingSystem.API.Controllers
     {
         private readonly IAuthRepo _repo;
         private readonly IConfiguration _config;
-        public AuthController(IAuthRepo repo, IConfiguration config)
+        private readonly IWebHostEnvironment _env;
+        public AuthController(IAuthRepo repo, IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
             _repo = repo;
+            _env = env;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(Dtos.LoginRequest request)
+        public async Task<ActionResult<string>> Login([FromForm] Dtos.LoginRequest request)
         {
             var user = await _repo.Login(request.FullName,request.Password);
 
@@ -83,6 +86,17 @@ namespace TicketingSystem.API.Controllers
             if (await _repo.UserExists(request.Email))
                 return BadRequest("Email already exisits");
 
+
+            var uploadRoot = Path.Combine(_env.ContentRootPath, "UserImagesUploads");
+            Directory.CreateDirectory(uploadRoot);
+
+
+            var uniqueName = $"{Path.GetFileNameWithoutExtension(request.Image.FileName)}_{Guid.NewGuid():N}{Path.GetExtension(request.Image.FileName)}";
+            var path = Path.Combine(uploadRoot, uniqueName);
+
+            await using var stream = System.IO.File.Create(path);
+            await request.Image.CopyToAsync(stream);
+
             var userToCreate = new User
             {
                 FullName = request.FullName,
@@ -90,6 +104,7 @@ namespace TicketingSystem.API.Controllers
                 CreatedAt = DateTime.Now,
                 MobileNumber = request.MobileNumber,
                 DateOfBirth = request.DateOfBirth,
+                ImagePath = path,
                 Address = request.Address,
                 UserType = request.UserType,
                 IsActive = false

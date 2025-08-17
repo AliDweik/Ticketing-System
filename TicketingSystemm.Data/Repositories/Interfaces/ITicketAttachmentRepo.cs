@@ -12,6 +12,6 @@ namespace TicketingSystem.Data.Repositories.Interfaces
         Task<TicketAttachment> AddAttachment(TicketAttachment attachment);
 
         Task<List<TicketAttachment>> GetAttachmentsForTicket(Guid ticketId);
-        Task <TicketAttachment> GetAttachment(Guid attachmentId);
+        Task <TicketAttachment?> GetAttachment(Guid attachmentId);
     }
 }

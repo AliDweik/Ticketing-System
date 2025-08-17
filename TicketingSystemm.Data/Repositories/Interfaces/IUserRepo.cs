@@ -10,8 +10,8 @@ namespace TicketingSystem.Data.Repositories.Interfaces
 {
     public interface IUserRepo
     {
-        Task<User> GetUserByEmail(string email);
-        Task<User> GetUserById(Guid userId);
+        Task <User?> GetUserByEmail(string email);
+        Task <User?> GetUserById(Guid userId);
         Task <IEnumerable<User>> GetUsersByType(UserType userType);
 
         Task ActivateUser(Guid userId);

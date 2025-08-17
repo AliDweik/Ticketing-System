@@ -24,6 +24,7 @@ namespace TicketingSystem.Data.Models.Auth
         [MaxLength(20)]
         public string MobileNumber { get; set; }
         public string Address  { get; set; }
+        public string? ImagePath {  get; set; }
         public string? UserImagePath { get; set; }
 
         [Required]

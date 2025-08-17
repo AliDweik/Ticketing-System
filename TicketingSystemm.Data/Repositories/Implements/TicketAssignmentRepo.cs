@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Data;
 using TicketingSystem.Data.Enums;
+using TicketingSystem.Data.Exceptions;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
 
@@ -22,40 +23,65 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task AssignTicket(Guid ticketId, Guid supportId)
         {
-            var ticket = await _context.Tickets.FindAsync(ticketId);
+            try
+            {
+                var ticket = await _context.Tickets.FindAsync(ticketId);
 
-            if (ticket == null)
-                throw new KeyNotFoundException("Ticket not found");
-        
-            var support = await _context.Users.FirstOrDefaultAsync(u => (u.Id == supportId && u.UserType == UserType.Support));
+                if (ticket == null)
+                    throw new KeyNotFoundException("Ticket not found");
 
-            if (support == null || support.IsActive == false)
-                throw new InvalidOperationException("Invalid support user");
+                var support = await _context.Users.FirstOrDefaultAsync(u => (u.Id == supportId && u.UserType == UserType.Support));
 
-            ticket.AssignedToId = supportId;
-            ticket.Status = TicketStatusEnum.InProgress;
-            ticket.LastUpdateAt = DateTime.Now;
+                if (support == null)
+                    throw new KeyNotFoundException("User not found");
+                if (support.IsActive == false)
+                    throw new AppException("User in not active");
 
-            await _context.SaveChangesAsync();
+                ticket.AssignedToId = supportId;
+                ticket.Status = TicketStatusEnum.InProgress;
+                ticket.LastUpdateAt = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<List<Ticket>> GetAssignedTickets(Guid supportId)
         {
-            var support = await _context.Users.FirstOrDefaultAsync(u => u.Id == supportId);
+            try
+            {
+                var support = await _context.Users
+                    .Include(u => u.AssignedTickets)
+                    .FirstOrDefaultAsync(u => u.Id == supportId);
 
-            if (support == null)
-                throw new InvalidOperationException("Invalid support user");
+                if (support == null)
+                    throw new KeyNotFoundException("User not found");
 
-            return support.AssignedTickets.ToList();
+                return support.AssignedTickets.ToList();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<bool> IsTicketAssigned(Guid ticketId)
         {
-            var ticket = await _context.Tickets.FindAsync(ticketId);
-            if(ticket == null || ticket.AssignedToId == null)
-                return false;
+            try
+            {
+                var ticket = await _context.Tickets.FindAsync(ticketId);
+                if (ticket == null || ticket.AssignedToId == null)
+                    return false;
 
-            return true;
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

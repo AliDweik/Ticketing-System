@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,28 @@ namespace TicketingSystem.API.Controllers
     {
         private readonly ITicketCommnetRepo _repo;
         private readonly ITicketRepo _ticketRepo;
+        private readonly IValidator<CommentRequest> _validator;
 
-        public CommentController(ITicketCommnetRepo repo, ITicketRepo ticketRepo)
+        public CommentController(ITicketCommnetRepo repo, ITicketRepo ticketRepo, IValidator<CommentRequest> validator)
         {
             _repo = repo;
             _ticketRepo = ticketRepo;
+            _validator = validator;
         }
 
         [Authorize(Policy = "UserWithTicket")]
         [HttpPost("{ticketId}")]
         public async Task<ActionResult<CommentResponse>> AddComment(CommentRequest request)
         {
+            var result = await _validator.ValidateAsync(request);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors);
+            }
+
+
             var ticket = await _ticketRepo.GetTicket(request.TicketId);
-            if (!TicketHelper.CanStart(ticket))
+            if (!TicketHelper.CanAddAttachment(ticket))
             {
                 return BadRequest();
             }

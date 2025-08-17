@@ -30,7 +30,7 @@ namespace TicketingSystem.API.Controllers
         public async Task<ActionResult> AddAttachment([FromForm] AttachmentRequest request)
         {
             var ticket = await _ticketRepo.GetTicket(request.TicketId);
-            if (!TicketHelper.CanStart(ticket))
+            if (!TicketHelper.CanAddAttachment(ticket))
             {
                 return BadRequest();
             }

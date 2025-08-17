@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Data;
+using TicketingSystem.Data.Exceptions;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
 
@@ -21,46 +24,66 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task<TicketAttachment> AddAttachment(TicketAttachment attachment)
         {
-            var ticket = await _context.Tickets.FindAsync(attachment.TicketId);
+            try
+            {
+                var ticket = await _context.Tickets.FindAsync(attachment.TicketId);
 
-            if (ticket == null)
-                throw new KeyNotFoundException("Ticket not found");
+                if (ticket == null)
+                    throw new KeyNotFoundException("Ticket not found");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => (u.Id == attachment.UploadedById));
+                var user = await _context.Users.FirstOrDefaultAsync(u => (u.Id == attachment.UploadedById));
 
-            if (user == null)
-                throw new InvalidOperationException("Invalid user");
+                if (user == null)
+                    throw new KeyNotFoundException("User not found");
 
-            ticket.Attachments.Add(attachment);
+                ticket.Attachments.Add(attachment);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            return attachment;
+                return attachment;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public async Task<TicketAttachment> GetAttachment(Guid attachmentId)
+        public async Task<TicketAttachment?> GetAttachment(Guid attachmentId)
         {
-            var attachment = await _context.TicketAttachments.FirstOrDefaultAsync(t => t.Id == attachmentId);
+            try
+            {
+                var attachment = await _context.TicketAttachments.FirstOrDefaultAsync(t => t.Id == attachmentId);
 
-            if (attachment == null)
-                throw new KeyNotFoundException("Ticket not found");
+                if (attachment == null)
+                    throw new KeyNotFoundException("Attachment not found");
 
-            return attachment;
+                return attachment;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<List<TicketAttachment>> GetAttachmentsForTicket(Guid ticketId)
         {
-            var ticket = await _context.Tickets
+            try
+            {
+                var ticket = await _context.Tickets
                 .Include(t => t.Attachments)
                 .FirstOrDefaultAsync(t => t.Id == ticketId);
 
-            if (ticket == null)
-                throw new KeyNotFoundException("Ticket not found");
+                if (ticket == null)
+                    throw new KeyNotFoundException("Ticket not found");
 
+                var attachments = ticket.Attachments.ToList();
 
-            var attachments = ticket.Attachments.ToList();
-
-            return attachments;
+                return attachments;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

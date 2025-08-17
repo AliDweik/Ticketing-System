@@ -6,11 +6,19 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using FluentValidation;
 using TicketingSystem.API.Handlers;
+using TicketingSystem.API.Middlewares;
 using TicketingSystem.API.Requierments;
+using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Data;
 using TicketingSystem.Data.Repositories.Implements;
 using TicketingSystem.Data.Repositories.Interfaces;
+using TicketingSystem.API.Dtos;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Json;
+using Microsoft.Extensions.Logging.Configuration;
 
 namespace TicketingSystem.API
 {
@@ -18,8 +26,15 @@ namespace TicketingSystem.API
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder();
+            builder.Host.ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+            });
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -42,8 +57,13 @@ namespace TicketingSystem.API
             builder.Services.AddScoped<ITicketAttachmentRepo, TicketAttachmentRepo>();
             builder.Services.AddScoped<ITicketCommnetRepo, TicketCommentRepo>();
             builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
-            
-            
+
+            builder.Services.AddScoped<IValidator<AttachmentRequest>, AttachmentValidator>();
+            builder.Services.AddScoped<IValidator<CommentRequest>, CommentValidator>();
+            builder.Services.AddScoped<IValidator<LoginRequest>, LoginValidator>();
+            builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterValidator>();
+            builder.Services.AddScoped<IValidator<TicketRequest>, TicketValidator>();
+
             builder.Services.AddEndpointsApiExplorer();
            
             builder.Services.AddSwaggerGen(options => {
@@ -86,7 +106,8 @@ namespace TicketingSystem.API
             {
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options => {
+            }).AddJwtBearer(options =>
+            {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -153,6 +174,8 @@ namespace TicketingSystem.API
             app.UseCors();
             app.MapControllers();
 
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+            
             app.MapHealthChecks("/health");
 
             app.Run();

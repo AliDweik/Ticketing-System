@@ -9,9 +9,9 @@ namespace TicketingSystem.Data.Helpers
 {
     public static class TicketHelper
     {
-        public static bool CanStart(Ticket ticket)
+        public static bool CanAddAttachment(Ticket ticket)
         {
-            if(ticket.Status == Enums.TicketStatusEnum.New || ticket.Status == Enums.TicketStatusEnum.Closed)
+            if(ticket.Status == Enums.TicketStatusEnum.Closed)
             {
                 return false;
             }

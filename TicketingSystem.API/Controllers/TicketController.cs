@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Sockets;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Models.Ticketing;
-using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Repositories.Interfaces;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace TicketingSystem.API.Controllers
 {
@@ -18,6 +19,7 @@ namespace TicketingSystem.API.Controllers
     public class TicketController : ControllerBase
     {
         private readonly ITicketRepo _repo;
+
         public TicketController(ITicketRepo repo)
         {
             _repo = repo;
@@ -27,7 +29,8 @@ namespace TicketingSystem.API.Controllers
         [Authorize(Roles = "Client", Policy = "UserWithTicket")]
         public async Task<ActionResult> FixTicket(Guid ticketId)
         {
-            return Ok(_repo.FixTicket(ticketId));
+            await _repo.FixTicket(ticketId);
+            return Ok("Ticket Fixed Successfully");
         }
 
         [HttpPost]
@@ -164,28 +167,21 @@ namespace TicketingSystem.API.Controllers
 
         [Authorize(Roles = "Support", Policy = "UserWithTicket")]
         [HttpPut("{ticketId}")]
-        public async Task<ActionResult<TicketResponse>> UpdateTicketStatus(Guid ticketId, string status)
+        public async Task<ActionResult<TicketResponse>> UpdateTicketStatus(Guid ticketId, TicketStatusEnum status)
         {
+            if(status != TicketStatusEnum.InProgress || status != TicketStatusEnum.Closed)
+            {
+                return BadRequest("Status is not applicable");
+            }
 
-            TicketStatusEnum statusEnum;
-            if (status == "In Progress")
-            {
-                statusEnum = TicketStatusEnum.InProgress;
-            }
-            else if(status == "Closed")
-            {
-                statusEnum = TicketStatusEnum.Closed;
-            }
-            else
-            {
-                statusEnum = TicketStatusEnum.InProgress;
-            }
-            var ticket = await _repo.UpdateTicketStatus(ticketId, statusEnum);
+            var ticket = await _repo.GetTicket(ticketId);
 
-            if(status == "Closed" && ticket.IsFixed == false)
+            if(status == TicketStatusEnum.Closed && ticket.IsFixed == false)
             {
                 return BadRequest("Ticket is not fixed");
             }
+
+            await _repo.UpdateTicketStatus(ticketId, status);
 
             var ticketResponse = new TicketResponse
             {

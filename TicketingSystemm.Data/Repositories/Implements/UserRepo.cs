@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Data;
 using TicketingSystem.Data.Enums;
+using TicketingSystem.Data.Exceptions;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Repositories.Interfaces;
 
@@ -22,49 +23,88 @@ namespace TicketingSystem.Data.Repositories.Implements
 
         public async Task ActivateUser(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null)
-                throw new KeyNotFoundException("User not found");
+            try
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                if (user == null)
+                    throw new KeyNotFoundException("User not found");
 
-            user.IsActive = true;
+                user.IsActive = true;
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task DeactivateUser(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
-            if (user == null)
-                throw new KeyNotFoundException("User not found");
+                if (user == null)
+                    throw new KeyNotFoundException("User not found");
 
-            user.IsActive = false;
+                user.IsActive = false;
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null)
-                throw new KeyNotFoundException("User not found");
+                if (user == null)
+                    throw new KeyNotFoundException("User not found");
 
-            return user;
+                return user;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public async Task<User> GetUserById(Guid userId)
+        public async Task<User?> GetUserById(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null)
-                throw new KeyNotFoundException("User not found");
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                    throw new KeyNotFoundException("User not found");
 
-            return user;
+                return user;
+            }
+            catch
+            {
+                throw;
+            }
+
         }
 
         public async Task<IEnumerable<User>> GetUsersByType(UserType userType)
         {
-            return await _context.Users.Where(u => u.UserType == userType).ToListAsync();
+            try
+            {
+                var users = await _context.Users.Where(u => u.UserType == userType).ToListAsync();
+                if (users == null)
+                    throw new KeyNotFoundException("There is no users");
+                return users;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
