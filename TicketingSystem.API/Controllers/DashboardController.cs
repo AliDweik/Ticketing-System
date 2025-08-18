@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TicketingSystem.Data.Dtos.Dashboard;
 using TicketingSystem.Data.Exceptions;
+using TicketingSystem.Data.Models.Dashboard;
 using TicketingSystem.Data.Repositories.Implements;
 using TicketingSystem.Data.Repositories.Interfaces;
 

@@ -73,7 +73,10 @@ namespace TicketingSystem.Data.Repositories.Implements
             try
             {
                 var ticket = await _context.Tickets.FindAsync(ticketId);
-                if (ticket == null || ticket.AssignedToId == null)
+                if (ticket == null)
+                    throw new KeyNotFoundException("Ticket not found");
+
+                if(ticket.AssignedToId == null)
                     return false;
 
                 return true;

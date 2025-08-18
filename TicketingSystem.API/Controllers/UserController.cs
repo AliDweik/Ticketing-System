@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TicketingSystem.API.Dtos;
 using TicketingSystem.API.Validators;
-using TicketingSystem.Data.Dtos.Auth;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Repositories.Interfaces;

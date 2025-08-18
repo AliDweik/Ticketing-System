@@ -1,7 +1,6 @@
-﻿
-using TicketingSystem.Data.Enums;
+﻿using TicketingSystem.Data.Enums;
 
-namespace TicketingSystem.Data.Dtos.Dashboard
+namespace TicketingSystem.Data.Models.Dashboard
 {
     public class TicketStatus
     {

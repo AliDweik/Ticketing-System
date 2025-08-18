@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TicketingSystem.Data.Dtos.Dashboard;
+using TicketingSystem.Data.Models.Dashboard;
 using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Models.Auth;
 

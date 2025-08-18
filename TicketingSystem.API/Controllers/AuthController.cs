@@ -37,14 +37,14 @@ namespace TicketingSystem.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login([FromForm] LoginRequest request)
         {
-            /*var validationResult = await _validator.ValidateAsync(request);
+            var validationResult = await _validator.ValidateAsync(request);
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.ToProblemDetails());
-            */
+
             var user = await _repo.Login(request.FullName,request.Password);
 
             if (user == null)
-                return BadRequest();
+                return BadRequest("User not found");
 
             if(!user.IsActive)
                 return Unauthorized("Wait for your account to be activated");

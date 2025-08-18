@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TicketingSystem.Data.Dtos.Dashboard;
+using TicketingSystem.Data.Models.Dashboard;
 using TicketingSystem.Data.Enums;
 
 namespace TicketingSystem.Data.Models.Ticketing

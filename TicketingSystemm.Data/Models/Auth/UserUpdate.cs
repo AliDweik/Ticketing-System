@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Enums;
 
-namespace TicketingSystem.Data.Dtos.Auth
+namespace TicketingSystem.Data.Models.Auth
 {
     public class UserUpdate
     {

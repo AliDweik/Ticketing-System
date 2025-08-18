@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Data;
-using TicketingSystem.Data.Dtos.Auth;
 using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Exceptions;
 using TicketingSystem.Data.Helpers;
@@ -62,40 +61,6 @@ namespace TicketingSystem.Data.Repositories.Implements
             {
                 throw;
             }
-        }
-
-        public async Task<User?> GetUserByEmail(string email)
-        {
-            try
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-                if (user == null)
-                    throw new KeyNotFoundException("User not found");
-
-                return user;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public async Task<User?> GetUserById(Guid userId)
-        {
-            try
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
-                    throw new KeyNotFoundException("User not found");
-
-                return user;
-            }
-            catch
-            {
-                throw;
-            }
-
         }
 
         public async Task<IEnumerable<User>> GetUsersByType(UserType userType)
@@ -172,6 +137,7 @@ namespace TicketingSystem.Data.Repositories.Implements
                 if(user.DateOfBirth != null)
                     userToUpdate.DateOfBirth = (DateTime) user.DateOfBirth;
 
+                await _context.SaveChangesAsync();
                 if (error == "")
                     return userToUpdate;
                 else

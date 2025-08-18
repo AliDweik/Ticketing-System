@@ -1,4 +1,4 @@
-﻿namespace TicketingSystem.Data.Dtos.Dashboard
+﻿namespace TicketingSystem.Data.Models.Dashboard
 {
     public class Dashboard
     {

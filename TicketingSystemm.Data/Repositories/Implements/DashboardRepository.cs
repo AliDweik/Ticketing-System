@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.Data.Data;
-using TicketingSystem.Data.Dtos.Dashboard;
 using TicketingSystem.Data.Exceptions;
+using TicketingSystem.Data.Models.Dashboard;
 using TicketingSystem.Data.Repositories.Interfaces;
 
 namespace TicketingSystem.Data.Repositories.Implements

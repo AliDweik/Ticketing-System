@@ -19,7 +19,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Microsoft.Extensions.Logging.Configuration;
-using TicketingSystem.Data.Dtos.Auth;
+using TicketingSystem.Data.Models.Auth;
 
 namespace TicketingSystem.API
 {

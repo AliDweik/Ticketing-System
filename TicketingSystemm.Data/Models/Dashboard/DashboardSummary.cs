@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TicketingSystem.Data.Dtos.Dashboard
+namespace TicketingSystem.Data.Models.Dashboard
 {
     public class DashboardSummary
     {

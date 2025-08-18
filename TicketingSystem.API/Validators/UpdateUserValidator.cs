@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using TicketingSystem.Data.Dtos.Auth;
+using TicketingSystem.Data.Models.Auth;
 
 namespace TicketingSystem.API.Validators
 {
