@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Models.Ticketing;
@@ -22,16 +23,24 @@ namespace TicketingSystem.API.Controllers
         private readonly IAuthRepo _repo;
         private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _env;
-        public AuthController(IAuthRepo repo, IConfiguration config, IWebHostEnvironment env)
+        private readonly IValidator<LoginRequest> _validator;
+        private readonly IValidator<RegisterRequest> _registerValidator;
+        public AuthController(IAuthRepo repo, IConfiguration config, IWebHostEnvironment env, IValidator <LoginRequest> validator, IValidator <RegisterRequest> registerValidator)
         {
             _config = config;
             _repo = repo;
             _env = env;
+            _validator = validator;
+            _registerValidator = registerValidator;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login([FromForm] Dtos.LoginRequest request)
+        public async Task<ActionResult<string>> Login([FromForm] LoginRequest request)
         {
+            /*var validationResult = await _validator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
+            */
             var user = await _repo.Login(request.FullName,request.Password);
 
             if (user == null)
@@ -79,9 +88,13 @@ namespace TicketingSystem.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(Dtos.RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request)
         {
-            if(await _repo.UserExists(request.FullName))
+            var validationResult = await _registerValidator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
+
+            if (await _repo.UserExists(request.FullName))
                 return BadRequest("Username already exisits");
             if (await _repo.UserExists(request.Email))
                 return BadRequest("Email already exisits");

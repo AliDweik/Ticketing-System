@@ -1,24 +1,30 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.API.Validators;
+using TicketingSystem.Data.Dtos.Auth;
+using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Repositories.Interfaces;
 
 namespace TicketingSystem.API.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserRepo _repo;
-        
-        public UserController(IUserRepo repo)
+        private readonly IValidator <UserUpdate> _validator;
+        public UserController(IUserRepo repo, IValidator <UserUpdate> validator)
         {
             _repo = repo;
+            _validator = validator;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{userId}/activate")]
         public async Task<IActionResult> ActivateUser(Guid userId)
         {
@@ -26,6 +32,7 @@ namespace TicketingSystem.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{userId}/deactivate")]
         public async Task<IActionResult> DeactivateUser(Guid userId)
         {
@@ -33,6 +40,7 @@ namespace TicketingSystem.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("clients")]
         public async Task<ActionResult<IEnumerable<UserResponse>>> GetClients()
         {
@@ -58,6 +66,7 @@ namespace TicketingSystem.API.Controllers
             return Ok(clientsRepsonse);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("supports")]
         public async Task<ActionResult<IEnumerable<UserResponse>>> GetSupports()
         {
@@ -81,6 +90,18 @@ namespace TicketingSystem.API.Controllers
             }
 
             return Ok(supportsRepsonse);
+        }
+
+        [PolicyOrRole("UserWithoutTicket","Admin")]
+        [HttpPut("{userId}/update")]
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromForm] UserUpdate user)
+        {
+            var validationResult = await _validator.ValidateAsync(user);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
+
+            await _repo.UpdateUser(userId, user);
+            return Ok("User Updated Successfully");
         }
     }
 }

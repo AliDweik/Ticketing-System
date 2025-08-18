@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
@@ -17,18 +19,24 @@ namespace TicketingSystem.API.Controllers
         private readonly ITicketAttachmentRepo _repo;
         private readonly ITicketRepo _ticketRepo;
         private readonly IWebHostEnvironment _env;
+        private readonly IValidator<AttachmentRequest> _validator;
 
-        public AttachmentController(ITicketAttachmentRepo repo, ITicketRepo ticketRepo, IWebHostEnvironment env)
+        public AttachmentController(ITicketAttachmentRepo repo, ITicketRepo ticketRepo, IWebHostEnvironment env, IValidator <AttachmentRequest> validator)
         {
             _repo = repo;
             _ticketRepo = ticketRepo;
             _env = env;
+            _validator = validator;
         }
 
         [Authorize(Policy = "UserWithTicket")]
         [HttpPost("{ticketId}")]
         public async Task<ActionResult> AddAttachment([FromForm] AttachmentRequest request)
         {
+            var validationResult = await _validator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
+
             var ticket = await _ticketRepo.GetTicket(request.TicketId);
             if (!TicketHelper.CanAddAttachment(ticket))
             {

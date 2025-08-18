@@ -1,10 +1,12 @@
 ﻿using Azure.Core;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Sockets;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Enums;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
@@ -19,10 +21,11 @@ namespace TicketingSystem.API.Controllers
     public class TicketController : ControllerBase
     {
         private readonly ITicketRepo _repo;
-
-        public TicketController(ITicketRepo repo)
+        private readonly IValidator<TicketRequest> _validator;
+        public TicketController(ITicketRepo repo, IValidator <TicketRequest> validator)
         {
             _repo = repo;
+            _validator = validator;
         }
 
         [HttpPut("{ticketId}/fix")]
@@ -37,6 +40,10 @@ namespace TicketingSystem.API.Controllers
         [Authorize(Roles = "Client")]
         public async Task<ActionResult<TicketRequest>> AddTicket(TicketRequest ticket)
         {
+            var validationResult = await _validator.ValidateAsync(ticket);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
+
             var ticketToCreate = new Ticket
             {
                 Title = ticket.Title,

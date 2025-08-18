@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TicketingSystem.API.Dtos;
+using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Implements;
@@ -31,18 +32,15 @@ namespace TicketingSystem.API.Controllers
         [HttpPost("{ticketId}")]
         public async Task<ActionResult<CommentResponse>> AddComment(CommentRequest request)
         {
-            var result = await _validator.ValidateAsync(request);
-            if (!result.IsValid)
-            {
-                return BadRequest(result.Errors);
-            }
+            var validationResult = await _validator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToProblemDetails());
 
 
             var ticket = await _ticketRepo.GetTicket(request.TicketId);
             if (!TicketHelper.CanAddAttachment(ticket))
-            {
                 return BadRequest();
-            }
+
             var createdComment = await _repo.AddComment(request.TicketId, request.CommentedById, request.Comment);
 
             var commentResponse = new CommentResponse

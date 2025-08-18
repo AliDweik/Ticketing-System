@@ -19,6 +19,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Microsoft.Extensions.Logging.Configuration;
+using TicketingSystem.Data.Dtos.Auth;
 
 namespace TicketingSystem.API
 {
@@ -26,12 +27,8 @@ namespace TicketingSystem.API
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder();
-            builder.Host.ConfigureLogging(logging =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-            });
+            var builder = WebApplication.CreateBuilder(args);
+
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
@@ -63,6 +60,7 @@ namespace TicketingSystem.API
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginValidator>();
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterValidator>();
             builder.Services.AddScoped<IValidator<TicketRequest>, TicketValidator>();
+            builder.Services.AddScoped<IValidator<UserUpdate>, UpdateUserValidator>();
 
             builder.Services.AddEndpointsApiExplorer();
            
@@ -120,6 +118,8 @@ namespace TicketingSystem.API
                         Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
                 };
             });
+
+            builder.Logging.AddFile("Logs/log-{Date}.txt");
 
             builder.Services.AddHttpContextAccessor();
 

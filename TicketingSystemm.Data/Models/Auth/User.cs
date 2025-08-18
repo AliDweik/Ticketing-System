@@ -25,7 +25,6 @@ namespace TicketingSystem.Data.Models.Auth
         public string MobileNumber { get; set; }
         public string Address  { get; set; }
         public string? ImagePath {  get; set; }
-        public string? UserImagePath { get; set; }
 
         [Required]
         public UserType UserType { get; set; }
