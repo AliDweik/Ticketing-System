@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TicketingSystem.API.Dtos;
 using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Enums;
+using TicketingSystem.Data.Helpers;
 using TicketingSystem.Data.Models.Auth;
 using TicketingSystem.Data.Models.Ticketing;
 using TicketingSystem.Data.Repositories.Interfaces;
@@ -44,7 +45,7 @@ namespace TicketingSystem.API.Controllers
             var user = await _repo.Login(request.FullName,request.Password);
 
             if (user == null)
-                return BadRequest("User not found");
+                return BadRequest("User not found Or Password is incorrect");
 
             if(!user.IsActive)
                 return Unauthorized("Wait for your account to be activated");
@@ -99,16 +100,21 @@ namespace TicketingSystem.API.Controllers
             if (await _repo.UserExists(request.Email))
                 return BadRequest("Email already exisits");
 
+            string path = "";
 
-            var uploadRoot = Path.Combine(_env.ContentRootPath, "UserImagesUploads");
-            Directory.CreateDirectory(uploadRoot);
+            if(request.Image != null)
+            {
+                var uploadRoot = Path.Combine(_env.ContentRootPath, "UserImagesUploads");
+                Directory.CreateDirectory(uploadRoot);
 
 
-            var uniqueName = $"{Path.GetFileNameWithoutExtension(request.Image.FileName)}_{Guid.NewGuid():N}{Path.GetExtension(request.Image.FileName)}";
-            var path = Path.Combine(uploadRoot, uniqueName);
+                var uniqueName = $"{Path.GetFileNameWithoutExtension(request.Image.FileName)}_{Guid.NewGuid():N}{Path.GetExtension(request.Image.FileName)}";
+                path = Path.Combine(uploadRoot, uniqueName);
 
-            await using var stream = System.IO.File.Create(path);
-            await request.Image.CopyToAsync(stream);
+                await using var stream = System.IO.File.Create(path);
+                await request.Image.CopyToAsync(stream);
+
+            }
 
             var userToCreate = new User
             {
@@ -128,7 +134,7 @@ namespace TicketingSystem.API.Controllers
 
             var user = await _repo.Register(userToCreate, request.Password);
 
-            return Ok(user);
+            return Ok("User Created Successfully");
         }
     }
 }

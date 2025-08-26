@@ -16,13 +16,16 @@ namespace TicketingSystem.API.Validators
                 .EmailAddress().WithMessage("Invalid email format")
                 .MaximumLength(100).WithMessage("Email cannot exceed 100 characters");
 
-            RuleFor(x => x.Image)
+            When(x => x.Image != null, () =>
+            {
+                RuleFor(x => x.Image)
                 .Must(image => image == null || image.Length <= 10 * 1024 * 1024)
                 .WithMessage("Image size must be less than 10MB")
                 .Must(image => image == null ||
                     new[] { ".jpg", ".jpeg", ".png" }.Contains(Path.GetExtension(image.FileName).ToLower()))
                 .WithMessage("Only JPG and PNG images are allowed");
-
+            });
+            
             RuleFor(x => x.MobileNumber)
                 .NotEmpty().WithMessage("Mobile number is required")
                 .Matches(@"^\+?[0-9]{10,15}$").WithMessage("Invalid mobile number format");

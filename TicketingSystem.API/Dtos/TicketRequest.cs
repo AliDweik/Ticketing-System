@@ -9,7 +9,6 @@ namespace TicketingSystem.API.Dtos
     {
         public string Title { get; set; }
         public string ProblemDescription { get; set; }
-        public Guid CreatedById { get; set; }
         public Guid ProductId { get; set; }
     }
 }

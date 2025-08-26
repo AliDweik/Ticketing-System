@@ -15,9 +15,6 @@ namespace TicketingSystem.API.Validators
                 .NotEmpty().WithMessage("Description is required")
                 .MaximumLength(2000).WithMessage("Description cannot exceed 2000 characters");
 
-            RuleFor(x => x.CreatedById)
-                .NotEmpty().WithMessage("Creator ID is required");
-
             RuleFor(x => x.ProductId)
                 .NotEmpty().WithMessage("Product ID is required");
         }

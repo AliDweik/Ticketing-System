@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Sockets;
+using System.Security.Claims;
 using TicketingSystem.API.Dtos;
 using TicketingSystem.API.Validators;
 using TicketingSystem.Data.Enums;
@@ -44,12 +45,14 @@ namespace TicketingSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.ToProblemDetails());
 
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var ticketToCreate = new Ticket
             {
                 Title = ticket.Title,
                 ProblemDescription = ticket.ProblemDescription,
                 CreatedAt = DateTime.Now,
-                CreatedById = ticket.CreatedById,
+                CreatedById = Guid.Parse(currentUserId),
                 ProductId = ticket.ProductId,
                 Status = TicketStatusEnum.New
             };
@@ -176,7 +179,7 @@ namespace TicketingSystem.API.Controllers
         [HttpPut("{ticketId}")]
         public async Task<ActionResult<TicketResponse>> UpdateTicketStatus(Guid ticketId, TicketStatusEnum status)
         {
-            if(status != TicketStatusEnum.InProgress || status != TicketStatusEnum.Closed)
+            if(status != TicketStatusEnum.InProgress && status != TicketStatusEnum.Closed)
             {
                 return BadRequest("Status is not applicable");
             }
@@ -190,22 +193,7 @@ namespace TicketingSystem.API.Controllers
 
             await _repo.UpdateTicketStatus(ticketId, status);
 
-            var ticketResponse = new TicketResponse
-            {
-                Id = ticket.Id,
-                Title = ticket.Title,
-                ProblemDescription = ticket.ProblemDescription,
-                Status = ticket.Status,
-                IsFixed = ticket.IsFixed,
-                CreatedAt = DateTime.Now,
-                LastUpdateAt = ticket.LastUpdateAt,
-                ProductId = ticket.ProductId,
-                CreatedById = ticket.CreatedById,
-                AssignedToId = ticket.AssignedToId,
-                ClosedAt = ticket.ClosedAt,
-            };
-
-            return Ok(ticketResponse);
+            return Ok("Ticket Status Updated Successfully");
         }
     }
 }
