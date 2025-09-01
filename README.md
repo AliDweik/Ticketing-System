@@ -78,7 +78,7 @@ Update the connection string in appsettings.json:
 
 Apply database migrations
 
-dotnet ef database update --project TicketingSystem.Data --startup-project TicketingSystem.API
+dotnet ef database update --project TicketingSystemm.Data --startup-project TicketingSystem.API
 
 
 Run the application
@@ -101,6 +101,7 @@ Logging: Serilog
 
 # 🔧 Configuration
 # 🌍 Environment Variables
+
 # JWT Configuration
 JWT__Secret=your-super-secret-key
 JWT__Issuer=your-issuer
